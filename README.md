@@ -22,3 +22,29 @@ To edit this repository in MakeCode.
 
 * for PXT/microbit
 <script src="https://makecode.com/gh-pages-embed.js"></script><script>makeCodeRender("{{ site.makecode.home_url }}", "{{ site.github.owner_name }}/{{ site.github.repository_name }}");</script>
+
+Orchestra Extension for micro:bit
+Orchestral composition extension for MakeCode with full BPM control, dynamics, and radio synchronization.
+Features
+
+Full orchestral note range (C2-C6)
+BPM tempo control (40-240)
+Musical durations (whole, half, quarter, eighth, sixteenth notes)
+Dynamic markings (pp, p, mp, mf, f, ff)
+Multi-voice support (up to 4 voices)
+Radio synchronization (conductor/player mode)
+Metronome for practice
+
+Use as Extension
+This repository can be added as an extension in MakeCode.
+
+open https://makecode.microbit.org/
+click on New Project
+click on Extensions under the gearwheel menu
+search for the URL of this repository and import
+
+License
+MIT
+Supported targets
+
+for PXT/microbit

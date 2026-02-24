@@ -1,24 +1,20 @@
 {
-    "name": "orchestra",
-    "version": "1.0.0",
-    "description": "Orchestral composition extension with BPM control, dynamics, and radio synchronization",
-    "license": "MIT",
+    "name": "microbit-orchestra",
+    "description": "Orchestral composition extension for MakeCode",
     "dependencies": {
         "core": "*",
-        "radio": "*"
+        "radio": "*",
+        "music": "*"
     },
     "files": [
         "README.md",
-        "main.ts"
+        "custom.ts",
+        "test.ts"
     ],
-    "testFiles": [],
-    "public": true,
+    "testFiles": [
+        "test.ts"
+    ],
     "targetVersions": {
-        "target": "6.0.19",
-        "targetId": "microbit"
-    },
-    "supportedTargets": [
-        "microbit"
-    ],
-    "preferredEditor": "blocksprj"
+        "target": "6.0.0"
+    }
 }

@@ -1,4 +1,20 @@
 /**
+ * Common Key Signatures
+ */
+enum KeySignature {
+    //% block="C Major / A Minor"
+    C = 0,
+    //% block="G Major / E Minor"
+    G = 1,
+    //% block="F Major / D Minor"
+    F = -1,
+    //% block="D Major / B Minor"
+    D = 2,
+    //% block="Bb Major / G Minor"
+    Bb = -2
+}
+
+/**
  * Musical notation durations
  */
 enum NoteDuration {
@@ -14,17 +30,9 @@ enum NoteDuration {
     Sixteenth = 0.25
 }
 
-enum TimeSignatureDenominator {
-    //% block="2"
-    Half = 2,
-    //% block="4"
-    Quarter = 4,
-    //% block="8"
-    Eighth = 8,
-    //% block="16"
-    Sixteenth = 16
-}
-
+/**
+ * Orchestral dynamic markings
+ */
 enum Dynamic {
     //% block="pp"
     PP = 45,
@@ -40,41 +48,33 @@ enum Dynamic {
 
 //% color=#ECA40D icon="\uf001" weight=100
 namespace Orchestra {
+    // State variables (removed multi-voice logic)
     let currentVolume = Dynamic.MF;
-    let lastDuration = 0;
-    let pendingTieDuration = 0;
+    let currentKey = KeySignature.C;
 
     /**
-     * Ties the duration of the previous note to the next note played.
+     * Sets the key signature for the orchestra.
      */
-    //% block="tie to next note"
-    //% weight=95
-    export function tieToNextNote(): void {
-        pendingTieDuration = lastDuration;
+    //% block="set key signature to %key"
+    //% weight=85
+    export function setKeySignature(key: KeySignature): void {
+        currentKey = key;
     }
 
     /**
-     * Plays a single note. If tied, it adds the previous duration to this one.
+     * Plays a single note sequentially. Multi-voice features have been removed.
      */
     //% block="play note %note|for %duration"
     //% note.shadow="device_note"
     //% weight=100
     export function playNote(note: number, duration: NoteDuration): void {
         music.setVolume(currentVolume);
-
-        // Combine this duration with any pending tie
-        let totalMusicalDuration = duration + pendingTieDuration;
-
-        // Save this duration in case the user wants to tie the NEXT note
-        lastDuration = duration;
-        pendingTieDuration = 0; // Reset after use
-
         let beatLength = 60000 / music.tempo();
-        music.playTone(note, beatLength * totalMusicalDuration);
+        music.playTone(note, beatLength * duration);
     }
 
     /**
-     * Sets the volume/dynamics for all notes played after this block.
+     * Sets the dynamics for subsequent notes.
      */
     //% block="set dynamic to %dynamic"
     //% weight=90
@@ -83,38 +83,38 @@ namespace Orchestra {
         music.setVolume(currentVolume);
     }
 
+    // --- LIGHT CONTROL SECTION ---
+
     /**
-     * Pauses the playback for a specific musical duration (a rest).
+     * Displays a progress bar on the LED grid based on song completion.
      */
-    //% block="rest for %duration"
-    //% weight=80
-    export function rest(duration: NoteDuration): void {
-        pendingTieDuration = 0; // A rest breaks a tie
-        let beatLength = 60000 / music.tempo();
-        music.rest(beatLength * duration);
+    //% block="show progress %current out of %total"
+    //% weight=40
+    export function showProgress(current: number, total: number): void {
+        led.plotBarGraph(current, total); // Uses built-in LED bar graph logic [4, 5]
     }
 
     /**
-     * Sets the time signature for the orchestra.
+     * Adjusts LED brightness based on the current orchestral volume.
      */
-    //% block="set time signature to %numerator | / %denominator"
-    //% numerator.min=1 numerator.max=16 numerator.defl=4
-    //% weight=75
-    export function setTimeSignature(numerator: number, denominator: TimeSignatureDenominator): void {
-        // Time signature logic
+    //% block="update brightness to volume"
+    //% weight=30
+    export function syncBrightness(): void {
+        led.setBrightness(currentVolume); // Maps current volume (0-255) to brightness [4, 5]
     }
 
     /**
-     * Sets a precise BPM for the orchestra.
+     * Plots a point on the LED grid based on the pitch of the note.
      */
-    //% block="set orchestra tempo to %bpm|BPM"
-    //% bpm.min=40 bpm.max=240 bpm.defl=120
-    //% weight=70
-    export function setOrchestraTempo(bpm: number): void {
-        music.setTempo(bpm);
+    //% block="plot pitch %note"
+    //% note.shadow="device_note"
+    //% weight=20
+    export function plotPitch(note: number): void {
+        basic.clearScreen();
+        // Simple mapping: index = note % 25 to fit on 5x5 grid
+        let index = note % 25;
+        let x = index % 5;
+        let y = Math.floor(index / 5);
+        led.plot(x, y); // Plots coordinates on the micro:bit screen [4-6]
     }
-
-    /**
-     * Conductor and Radio blocks follow...
-     */
 }

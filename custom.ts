@@ -15,7 +15,21 @@ enum NoteDuration {
 }
 
 /**
- * Orchestral dynamic markings (mapped to volume 0-255)
+ * Common denominators for time signatures
+ */
+enum TimeSignatureDenominator {
+    //% block="2"
+    Half = 2,
+    //% block="4"
+    Quarter = 4,
+    //% block="8"
+    Eighth = 8,
+    //% block="16"
+    Sixteenth = 16
+}
+
+/**
+ * Orchestral dynamic markings
  */
 enum Dynamic {
     //% block="pp"
@@ -32,13 +46,26 @@ enum Dynamic {
 
 //% color=#ECA40D icon="\uf001" weight=100
 namespace Orchestra {
-    // Internal variable to store the dynamic state (volume)
-    // MF is the standard default for orchestra starts
+    // State variables for the orchestra
     let currentVolume = Dynamic.MF;
+    let beatsPerMeasure = 4;
+    let beatValue = TimeSignatureDenominator.Quarter;
+
+    /**
+     * Sets the time signature for the orchestra (e.g., 4/4, 3/4, 6/8).
+     * @param numerator the number of beats per measure
+     * @param denominator the note value that receives one beat
+     */
+    //% block="set time signature to %numerator | / %denominator"
+    //% numerator.min=1 numerator.max=16 numerator.defl=4
+    //% weight=75
+    export function setTimeSignature(numerator: number, denominator: TimeSignatureDenominator): void {
+        beatsPerMeasure = numerator;
+        beatValue = denominator;
+    }
 
     /**
      * Sets the volume/dynamics for all notes played after this block.
-     * @param dynamic the dynamic marking (pp to ff)
      */
     //% block="set dynamic to %dynamic"
     //% weight=90
@@ -48,15 +75,12 @@ namespace Orchestra {
     }
 
     /**
-     * Plays a single note for a specific musical duration using the current dynamic level.
-     * @param note pitch of the note to play
-     * @param duration musical length (whole to sixteenth)
+     * Plays a single note for a specific musical duration.
      */
     //% block="play note %note|for %duration"
     //% note.shadow="device_note"
     //% weight=100
     export function playNote(note: number, duration: NoteDuration): void {
-        // Re-apply current volume in case other modules changed it
         music.setVolume(currentVolume);
         let beatLength = 60000 / music.tempo();
         music.playTone(note, beatLength * duration);
@@ -64,7 +88,6 @@ namespace Orchestra {
 
     /**
      * Pauses the playback for a specific musical duration (a rest).
-     * @param duration musical length of the rest
      */
     //% block="rest for %duration"
     //% weight=80

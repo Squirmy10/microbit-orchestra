@@ -48,7 +48,6 @@ enum Dynamic {
 
 //% color=#ECA40D icon="\uf001" weight=100
 namespace Orchestra {
-    // State variables (removed multi-voice logic)
     let currentVolume = Dynamic.MF;
     let currentKey = KeySignature.C;
 
@@ -62,7 +61,7 @@ namespace Orchestra {
     }
 
     /**
-     * Plays a single note sequentially. Multi-voice features have been removed.
+     * Plays a single note sequentially.
      */
     //% block="play note %note|for %duration"
     //% note.shadow="device_note"
@@ -83,38 +82,80 @@ namespace Orchestra {
         music.setVolume(currentVolume);
     }
 
+    /**
+     * Pauses the playback for a specific duration.
+     */
+    //% block="rest for %duration"
+    //% weight=80
+    export function rest(duration: NoteDuration): void {
+        let beatLength = 60000 / music.tempo();
+        music.rest(beatLength * duration);
+    }
+
+    /**
+     * Sets a precise BPM for the orchestra.
+     */
+    //% block="set orchestra tempo to %bpm|BPM"
+    //% weight=70
+    export function setOrchestraTempo(bpm: number): void {
+        music.setTempo(bpm);
+    }
+
     // --- LIGHT CONTROL SECTION ---
 
     /**
-     * Displays a progress bar on the LED grid based on song completion.
+     * Displays a progress bar on the LED grid.
      */
     //% block="show progress %current out of %total"
     //% weight=40
     export function showProgress(current: number, total: number): void {
-        led.plotBarGraph(current, total); // Uses built-in LED bar graph logic [4, 5]
+        led.plotBarGraph(current, total);
     }
 
     /**
-     * Adjusts LED brightness based on the current orchestral volume.
+     * Adjusts LED brightness based on volume.
      */
     //% block="update brightness to volume"
     //% weight=30
     export function syncBrightness(): void {
-        led.setBrightness(currentVolume); // Maps current volume (0-255) to brightness [4, 5]
+        led.setBrightness(currentVolume);
     }
 
     /**
-     * Plots a point on the LED grid based on the pitch of the note.
+     * Plots a point on the LED grid based on pitch.
      */
     //% block="plot pitch %note"
     //% note.shadow="device_note"
     //% weight=20
     export function plotPitch(note: number): void {
         basic.clearScreen();
-        // Simple mapping: index = note % 25 to fit on 5x5 grid
         let index = note % 25;
         let x = index % 5;
         let y = Math.floor(index / 5);
-        led.plot(x, y); // Plots coordinates on the micro:bit screen [4-6]
+        led.plot(x, y);
+    }
+
+    // --- RADIO CONTROL SECTION ---
+
+    /**
+     * Sends a start signal via radio; updated with semicolon.
+     */
+    //% block="conductor; send start signal %signal"
+    //% weight=10
+    export function sendStartSignal(signal: number): void {
+        radio.sendNumber(signal);
+    }
+
+    /**
+     * Runs code when a radio signal is received.
+     */
+    //% block="on conductor signal %signal received"
+    //% weight=5
+    export function onSignalReceived(signal: number, handler: () => void): void {
+        radio.onReceivedNumber(function (receivedNumber: number) {
+            if (receivedNumber == signal) {
+                handler();
+            }
+        });
     }
 }

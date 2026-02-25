@@ -1,6 +1,6 @@
 {
     "name": "microbit-orchestra",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "description": "Orchestral composition extension for MakeCode",
     "dependencies": {
         "core": "*",
